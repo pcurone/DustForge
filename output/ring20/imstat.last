@@ -1,0 +1,21 @@
+imagename = 'tclean/ring20_robust0.5_clean.image'
+axes      = []
+region    = "annulus[[16h00m00.000000s, -40d00m00.00000s],['1.094arcsec', '1.531arcsec']]"
+box       = ''
+chans     = ''
+stokes    = ''
+listit    = True
+verbose   = True
+mask      = ''
+logfile   = ''
+algorithm = 'classic'
+stretch   = False
+append    = True
+fence     = -1.0
+center    = 'mean'
+lside     = True
+zscore    = -1.0
+maxiter   = -1
+clmethod  = 'auto'
+niter     = 3
+#imstat( imagename='tclean/ring20_robust0.5_clean.image',axes=[],region="annulus[[16h00m00.000000s, -40d00m00.00000s],['1.094arcsec', '1.531arcsec']]",box='',chans='',stokes='',listit=True,verbose=True,mask='',logfile='',algorithm='classic',stretch=False,append=True,fence=-1.0,center='mean',lside=True,zscore=-1.0,maxiter=-1,clmethod='auto',niter=3 )

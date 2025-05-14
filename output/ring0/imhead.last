@@ -1,0 +1,6 @@
+imagename = 'tclean/ring0_robust0.5_clean.image'
+mode      = 'list'
+hdkey     = ''
+hdvalue   = ''
+verbose   = False
+#imhead( imagename='tclean/ring0_robust0.5_clean.image',mode='list',hdkey='',hdvalue='',verbose=False )

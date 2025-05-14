@@ -1,0 +1,3 @@
+# tclean/ring0_robust0.5_clean.image
+# Beammajor(arcsec)    Beamminor(arcsec)    PA(deg)    Flux_in_mask(mJy)    Peak_int(mJy/beam)    rms(mJy/beam)    Peak_SNR
+0.100   0.093   -82.56   50.27   23.90   1.89e-02   1265.12

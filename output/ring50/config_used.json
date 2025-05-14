@@ -1,0 +1,16 @@
+{
+    "model_type": "gaussian_ring",
+    "r1": 50,
+    "sigma1": 8,
+    "disk_R90": 70,
+    "disk_flux": 0.05,
+    "save_profile_plot": true,
+    "inclination": 45,
+    "PA": 30,
+    "distance": 160,
+    "RA": "16:00:00",
+    "Dec": "-40:00:00",
+    "ALMA_band": 6,
+    "ALMA_configuration": "C-7",
+    "integration_time": 1800
+}
