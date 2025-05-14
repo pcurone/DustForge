@@ -68,7 +68,7 @@ save_image_to_fits(
 )
 
 # === STEP 8: Save 1D profile data ===
-profile_txt_path = os.path.join(output_dir, "profile_1d.txt")
+profile_txt_path = os.path.join(output_dir, "profile_model.txt")
 np.savetxt(profile_txt_path, np.column_stack((r_array, profile_1d_scaled)), header="radius_AU intensity_Jy_per_sr")
 
 # === STEP 9: Optional: save profile plot ===
