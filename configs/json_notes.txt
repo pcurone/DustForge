@@ -1,0 +1,53 @@
+model_type  
+Type of disk profile to generate.  
+Example values: gaussian_ring, cavity, two_ring.
+
+r1  
+Radius where the ring peaks, in astronomical units (AU).
+
+sigma1  
+Standard deviation (width) of the ring, in AU.
+
+disk_R90  
+Radius enclosing 90 percent of the total disk flux, in AU.  
+Used to set the physical scale of the image.
+
+disk_flux  
+Total disk flux in millijanskys (mJy).  
+Used to normalize the model profile.
+
+inclination  
+Disk inclination in degrees.  
+0 is face-on, 90 is edge-on.
+
+PA  
+Position angle of the disk in degrees.  
+Measured East of North.
+
+distance  
+Distance to the source in parsecs.
+
+RA  
+Right Ascension of the source in HH:MM:SS format.
+
+Dec  
+Declination of the source in ±DD:MM:SS format.
+
+ALMA_configuration  
+Name of the ALMA antenna configuration file (e.g. alma.cycle10.7.cfg).  
+These files are located in the folder alma-configuration-files.
+
+integration_time  
+Total simulated integration time in seconds.
+
+central_freq  
+Central observing frequency in hertz (Hz).  
+Example: 230000000000.0 means 230 GHz (Band 6).
+
+bandwidth  
+Total bandwidth in Hz.  
+Example: 8000000000.0 means 8 GHz.
+
+pwv  
+Precipitable water vapor in millimeters.  
+Used to simulate atmospheric conditions.
