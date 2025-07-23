@@ -44,7 +44,7 @@ mask_semimajor = 1.5 * disk_size_arcsec
 noise_inner = 2.5 * disk_size_arcsec 
 noise_outer = 3.5 * disk_size_arcsec 
 
-cellsize = np.floor((res_arcsec / 6) * 1000) / 1000  # round down to nearest milliarcsec
+cellsize = np.floor((res_arcsec / 8) * 1000) / 1000  # round down to nearest milliarcsec
 
 if 4 * disk_size_arcsec  < 512 * cellsize:
     imsize = 512
