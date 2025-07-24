@@ -3,8 +3,8 @@ import os
 import subprocess
 
 # --- Select which steps to run ---
-RUN_MODEL = False
-RUN_SIMULATION = False
+RUN_MODEL = True
+RUN_SIMULATION = True
 RUN_ANALYSIS = True
 
 if len(sys.argv) < 2:
