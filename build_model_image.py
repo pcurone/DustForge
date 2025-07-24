@@ -36,21 +36,22 @@ else:
 
 # === STEP 4: Normalize to total flux ===
 dr = r_array[1] - r_array[0]
-total_raw_flux = np.sum(2 * np.pi * r_array * profile_1d * dr)
+total_raw_flux = np.sum(2 * np.pi * r_array * profile_1d * dr) * (np.pi/(config["distance"] * 3600 * 180))**2   # conversion from au to rad
 scaling_factor = config["disk_flux"] / total_raw_flux
 profile_1d_scaled = profile_1d * scaling_factor
 
 # === STEP 5: Make 2D image ===
 pixel_scale = config["disk_R90"] / 128  # gives ~256 pixels across R90
 image_2d = radial_to_image(
-    profile_r=profile_1d_scaled,
+    profile_r=profile_1d,
     r_array=r_array,
     npix=512,
     pixel_scale=pixel_scale,
     inclination=config["inclination"], 
     PA=config["PA"]
 )
-image_2d *= config["disk_flux"] / np.sum(image_2d)
+flux_conversion_factor = config["disk_flux"] / np.sum(image_2d)
+image_2d *= flux_conversion_factor
 
 # === STEP 6: Set up output directory ===
 config_name = os.path.splitext(os.path.basename(config_path))[0]
@@ -68,17 +69,17 @@ save_image_to_fits(
 )
 
 # === STEP 8: Save 1D profile data ===
-profile_txt_path = os.path.join(output_dir, "profile_1d.txt")
+profile_txt_path = os.path.join(output_dir, "profile_model.txt")
 np.savetxt(profile_txt_path, np.column_stack((r_array, profile_1d_scaled)), header="radius_AU intensity_Jy_per_sr")
 
 # === STEP 9: Optional: save profile plot ===
 if config.get("save_profile_plot", False):
-    plot_path = os.path.join(output_dir, "profile_plot.png")
+    plot_path = os.path.join(output_dir, "profile_model_plot.png")
     plt.figure()
     plt.plot(r_array, profile_1d_scaled)
     plt.xlabel("Radius [AU]")
     plt.ylabel("Intensity [Jy/sr]")
-    plt.title("1D Radial Profile")
+    plt.title("1D radial profile of the starting model")
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(plot_path)
