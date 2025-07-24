@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 from gofish import imagecube
 
+run_frank = True
+
 # === Step 1: Read config ===
 if len(sys.argv) < 2:
     print("Usage: python simulate_observation.py <config.json>")
@@ -41,12 +43,12 @@ dI_clean_jy_sr = dI_clean / beam_area_sr
 # Save CLEAN radial profile
 profile_path = os.path.join(output_dir, "CLEAN_profile.txt")
 np.savetxt(profile_path, np.column_stack([r_clean_au, I_clean_jy_sr, dI_clean_jy_sr]),
-            header="# Radius(au)\tIntensity(Jy/sr)\td_Intensity(Jy/sr)")
+            header=" Radius(au)\tIntensity(Jy/sr)\td_Intensity(Jy/sr)")
 
 
 # === Step 3: Compute recovery score for the CLEAN intensity radial profile ===
 
-def compute_recovery_score(model_r, model_I, clean_r, clean_I, clean_err):
+def compute_recovery_score(model_r, model_I, data_r, data_I, data_err, save_profiles=True):
     """
     Compute two recovery scores comparing the model and recovered (CLEAN) radial intensity profiles,
     taking into account the uncertainty on the CLEAN profile via inverse-variance weighting.
@@ -64,31 +66,32 @@ def compute_recovery_score(model_r, model_I, clean_r, clean_I, clean_err):
     """
 
     # Interpolate CLEAN profile to model radii
-    clean_I_interp = np.interp(model_r, clean_r, clean_I, left=np.nan, right=np.nan)
-    clean_err_interp = np.interp(model_r, clean_r, clean_err, left=np.nan, right=np.nan)
+    data_I_interp = np.interp(model_r, data_r, data_I, left=np.nan, right=np.nan)
+    data_err_interp = np.interp(model_r, data_r, data_err, left=np.nan, right=np.nan)
 
     # Mask NaNs
-    mask = ~np.isnan(clean_I_interp) & ~np.isnan(clean_err_interp)
+    mask = ~np.isnan(data_I_interp) & ~np.isnan(data_err_interp)
     model_I = model_I[mask]
-    clean_I_interp = clean_I_interp[mask]
-    clean_err_interp = clean_err_interp[mask]
+    data_I_interp = data_I_interp[mask]
+    data_err_interp = data_err_interp[mask]
 
     # Weighted L2 score
-    l2_numerator = np.sum(((model_I - clean_I_interp)**2) / clean_err_interp**2)
-    l2_denominator = np.sum((model_I**2) / clean_err_interp**2)
+    l2_numerator = np.sum(((model_I - data_I_interp)**2) / data_err_interp**2)
+    l2_denominator = np.sum((model_I**2) / data_err_interp**2)
     l2_score = 1 - np.sqrt(l2_numerator / l2_denominator)
 
     # Weighted L1 score
-    l1_numerator = np.sum(np.abs(model_I - clean_I_interp) / clean_err_interp)
-    l1_denominator = np.sum(np.abs(model_I) / clean_err_interp)
+    l1_numerator = np.sum(np.abs(model_I - data_I_interp) / data_err_interp)
+    l1_denominator = np.sum(np.abs(model_I) / data_err_interp)
     l1_score = 1 - (l1_numerator / l1_denominator)
 
     # Save interpolated comparison arrays for inspection
-    comparison_data = np.column_stack([model_r[mask], model_I, clean_I_interp, clean_err_interp])
-    comparison_path = os.path.join(output_dir, "interpolated_profiles_model_cleanI.txt")
-    np.savetxt(comparison_path, comparison_data,
-               header="# Radius [AU]    Model_I [Jy/sr]    CLEAN_I_interp [Jy/sr]    CLEAN_err_interp [Jy/sr]",
-               fmt="%.6e")
+    if save_profiles:
+        comparison_data = np.column_stack([model_r[mask], model_I, data_I_interp, data_err_interp])
+        comparison_path = os.path.join(output_dir, "interpolated_profiles_model_cleanI.txt")
+        np.savetxt(comparison_path, comparison_data,
+                  header="# Radius [AU]    Model_I [Jy/sr]    data_I_interp [Jy/sr]    data_err_interp [Jy/sr]",
+                  fmt="%.6e")
 
     return round(l1_score, 4), round(l2_score, 4)
     
@@ -144,3 +147,72 @@ with open(score_path, "w") as f:
     f.write(f"L2 recovery score (CLEAN): {l2_score}\n")
 
 
+
+# === Step 6: Optional FRANK module ===
+if run_frank:
+
+  import frank
+  from frank.radial_fitters import FrankFitter
+  from frank.geometry import FixedGeometry
+  from frank.io import save_fit, load_sol
+  from frank.make_figs import make_full_fig
+  frank.enable_logging()
+
+
+  print(' ')
+  print('##### RUNNING FRANK #####')
+  print(' ')
+
+  # load the visibility data
+  frank_dir = os.path.join(output_dir, "frank_fit")
+  dat = np.load(os.path.join(frank_dir, "uvtable_frank.npz"))
+  u, v, vis, wgt = dat['u'], dat['v'], dat['Vis'], dat['Wgt']
+
+  # set the disk viewing geometry
+  geom = FixedGeometry(incl, PA, dRA=0.0, dDec=0.0)
+
+  # configure the fitting code setup
+  FF = FrankFitter(Rmax=config["disk_R90"]/config["distance"]*2, geometry=geom, N=300, alpha=1.30, weights_smooth=0.01, method='LogNormal')
+  
+  # fit the visibilities
+  sol = FF.fit(u, v, vis, wgt)
+  make_full_fig(u, v, vis, wgt, sol, bin_widths=[1e4, 5e4], save_prefix=f'{frank_dir}/summary')
+
+  # read results
+  r_frank_arcsec = sol.r
+  r_frank_au = r_frank_arcsec * distance_pc  # from arcsec to AU
+  I_frank = sol.I
+
+  # save the fit
+  np.savetxt(os.path.join(frank_dir, f"frank_profile.txt"),
+              np.column_stack([r_frank_arcsec, r_frank_au, I_frank]),
+              header="# R(arcsec)\tR(au)\tIntensity(Jy/sr)", fmt="%.6e")
+
+  l1_frank, l2_frank = compute_recovery_score(r_model_au, I_model_jy_sr,
+                                              r_frank_au, I_frank, np.ones_like(I_frank))
+
+  frank_plot_path = os.path.join(frank_dir, "profile_comparison_model_CLEAN_frank.png")
+  plt.figure()
+  plt.plot(r_model_au, I_model_jy_sr, label="Input Model", lw=2)
+  plt.plot(r_clean_au, I_clean_jy_sr, label="CLEAN Profile", lw=2)
+  plt.fill_between(r_clean_au, I_clean_jy_sr - dI_clean_jy_sr, I_clean_jy_sr + dI_clean_jy_sr,
+                    color="tab:orange", alpha=0.3)
+  plt.plot(r_frank_au, I_frank, label="frank Profile", lw=2, ls="--")
+  plt.xlabel("Radius [AU]")
+  plt.ylabel("Intensity [Jy/sr]")
+  plt.title("Model vs CLEAN vs frank Radial Profile")
+  plt.grid(True)
+  plt.legend()
+  plt.text(0.95, 0.25,
+            f"L1 CLEAN: {l1_score:.3f}\nL2 CLEAN: {l2_score:.3f}\nL1 frank: {l1_frank:.3f}\nL2 frank: {l2_frank:.3f}",
+            transform=plt.gca().transAxes,
+            ha='right', fontsize=10, verticalalignment='top',
+            bbox=dict(facecolor='white', edgecolor='gray', alpha=0.8))
+  plt.tight_layout()
+  plt.savefig(frank_plot_path)
+  plt.close()
+  print("Saved model vs CLEAN vs frank comparison to:", frank_plot_path)
+
+  with open(os.path.join(frank_dir, "recovery_scores_frank.txt"), "w") as f:
+      f.write("# Columns: L1_recovery_frank\tL2_recovery_frank\n")
+      f.write(f"{l1_frank:.4f}\t{l2_frank:.4f}\n")
