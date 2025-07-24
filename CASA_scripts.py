@@ -153,3 +153,61 @@ with open(f'Info_image_{base_name}_robust{robust}.txt', 'w') as Info_txt:
 
 print(f"Finished the imaging of the continuum with robust {robust}")
 
+
+
+
+
+print(' ')
+print('##### EXTRACT UVTABLE #####')
+print(' ')
+
+# get the data tables out of the MS file
+tb.open("{msfile}")
+data = np.squeeze(tb.getcol("DATA"))
+flag = np.squeeze(tb.getcol("FLAG"))
+uvw = tb.getcol("UVW")
+weight = tb.getcol("WEIGHT")
+spwid = tb.getcol("DATA_DESC_ID")
+times = tb.getcol("TIME")
+tb.close()
+
+# get frequency information
+tb.open("{msfile}" + "/SPECTRAL_WINDOW")
+freqlist = np.squeeze(tb.getcol("CHAN_FREQ"))
+if freqlist.ndim == 0:
+    freqlist = np.array([freqlist])
+tb.close()
+
+# get rid of any lingering flagged columns (but there shouldn't be any!)
+good = np.squeeze(np.any(flag, axis=0) == False)
+data = data[:, good]
+weight = weight[:, good]
+uvw = uvw[:, good]
+spwid = spwid[good]
+times = times[good]
+
+# average the polarizations
+Re = np.sum(data.real * weight, axis=0) / np.sum(weight, axis=0)
+Im = np.sum(data.imag * weight, axis=0) / np.sum(weight, axis=0)
+vis = Re + 1j * Im
+wgt = np.sum(weight, axis=0)
+
+# associate each datapoint with a frequency
+get_freq = lambda ispw: freqlist[ispw]
+freqs = get_freq(spwid)
+
+# retrieve (u,v) positions in meters
+um = uvw[0,:]
+vm = uvw[1,:]
+wm = uvw[2,:]
+u, v = um * freqs / 2.9979e8, vm * freqs / 2.9979e8
+
+clight = 299792458
+wle = clight / freqs.mean()  # [m]
+
+# Output to npz file for frank
+os.makedirs("frank_fit", exist_ok=True)
+if os.path.exists('frank_fit/uvtable_frank.npz'):
+    os.remove('frank_fit/uvtable_frank.npz')
+np.savez('frank_fit/uvtable_frank.npz', u=u, v=v, Vis=vis, Wgt=wgt)
+print(f"# Measurement set exported frank_fit/uvtable_frank.npz")
