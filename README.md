@@ -1,6 +1,6 @@
 # DustForge: Simulating ALMA Dust Substructure
 
-DustForge is a modular pipeline for simulating ALMA continuum observations of protoplanetary disks with embedded dust substructures.
+DustForge is a work-in-progress modular pipeline for simulating ALMA continuum observations of protoplanetary disks with embedded dust substructures.
 
 ## Features
 - Define analytical disk intensity profiles (e.g., Gaussian rings)
