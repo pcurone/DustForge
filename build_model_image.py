@@ -37,7 +37,7 @@ else:
 # === STEP 4: Normalize to total flux ===
 dr = r_array[1] - r_array[0]
 total_raw_flux = np.sum(2 * np.pi * r_array * profile_1d * dr) * (np.pi/(config["distance"] * 3600 * 180))**2   # conversion from au to rad
-scaling_factor = config["disk_flux"] / total_raw_flux
+scaling_factor = config["disk_flux"] / total_raw_flux / np.cos(config["inclination"]*np.pi/180)   # taking into account the inclination as well 
 profile_1d_scaled = profile_1d * scaling_factor
 
 # === STEP 5: Make 2D image ===
