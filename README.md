@@ -14,7 +14,7 @@ DustForge is a work-in-progress modular pipeline for simulating ALMA continuum o
 ##  Requirements
 
 - Python 3.7+
-- [CASA 6+ (monolithic version](https://casa.nrao.edu/casa_obtaining.shtml).
+- [CASA 6+ (monolithic version)](https://casa.nrao.edu/casa_obtaining.shtml).
 - `astropy`, `numpy`, `matplotlib`
 - [frank](https://github.com/discsim/frank), [gofish](https://github.com/richteague/gofish)
 
