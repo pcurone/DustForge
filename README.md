@@ -1,6 +1,6 @@
 # DustForge: Simulating ALMA Dust Substructure
 
-DustForge is a modular pipeline for simulating ALMA continuum observations of protoplanetary disks with embedded dust substructures.
+DustForge is a work-in-progress modular pipeline for simulating ALMA continuum observations of protoplanetary disks with embedded dust substructures.
 
 ## Features
 - Define analytical disk intensity profiles (e.g., Gaussian rings)
@@ -14,8 +14,9 @@ DustForge is a modular pipeline for simulating ALMA continuum observations of pr
 ##  Requirements
 
 - Python 3.7+
-- CASA 6+ (monolithic version)
+- [CASA 6+ (monolithic version)](https://casa.nrao.edu/casa_obtaining.shtml).
 - `astropy`, `numpy`, `matplotlib`
+- [frank](https://github.com/discsim/frank), [gofish](https://github.com/richteague/gofish)
 
 ## Folder structure
 ```
