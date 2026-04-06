@@ -3,16 +3,14 @@
     "r1": 40,
     "sigma1": 8,
     "disk_R90": 70,
-    "disk_flux": 50e-3,
+    "disk_flux": 0.05,
     "save_profile_plot": true,
     "inclination": 45,
     "PA": 30,
     "distance": 160,
     "RA": "16:00:00",
     "Dec": "-40:00:00",
-
     "ALMA_band": 6,
-
     "configurations": [
         {
             "ALMA_configuration": "C-8",
@@ -27,7 +25,9 @@
             "integration_time": 902
         }
     ],
-
     "robust": 0.5,
-    "threshold": 2.0
+    "nsigma": 3.0,
+    "_imaging_overrides_note": "Remove underscore from cellsize/imsize to activate manual overrides",
+    "_cellsize": 0.0025,
+    "_imsize": 4096
 }
